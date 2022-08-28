@@ -17,19 +17,19 @@ public class SceneController : MonoBehaviour
 
 	private string _nameManagement = "Management";
 	private Scene _management;
-	private List<eScenes> _activeScenes;
+	private List<eScenes> _activeScenes = new();
 
 	void Awake()
 	{
 		if(_instance != null && _instance != this)
 		{
-			Destroy(this);
+			Destroy(this.gameObject);
 			return;
 		}
 		if(_instance == null)
 		{
 			_instance = this;
-			_activeScenes.Clear();
+			_activeScenes.Add(eScenes.MainMenu);
 		}
 
 	}
@@ -41,6 +41,8 @@ public class SceneController : MonoBehaviour
 		csp.localPhysicsMode = LocalPhysicsMode.None;
 		// Create and save reference to Managementscene
 		_management = SceneManager.CreateScene(_nameManagement, csp);
+
+		SceneManager.MoveGameObjectToScene(this.gameObject, _management);
 	}
 
 
@@ -66,14 +68,33 @@ public class SceneController : MonoBehaviour
 			{
 				if(!_activeScenes.Contains(eScenes.GameUI))
 				{
-					StartCoroutine(AddScene(eScenes.GameUI));
+					StartCoroutine(AddScene(eScenes.GameUI, true));
 					_activeScenes.Add(eScenes.GameUI);
+				}
+
+				for(int i = _activeScenes.Count - 1; i >= 0; i--)
+				{
+					if(_activeScenes[i] != eScenes.GameUI)
+					{
+						SceneManager.UnloadSceneAsync((int)_activeScenes[i]);
+						_activeScenes.Remove(_activeScenes[i]);
+					}
+				}
+
+				if(_activeScenes.Contains(eScenes.MainMenu))
+				{
+					SceneManager.UnloadSceneAsync((int)eScenes.MainMenu);
+					_activeScenes.Remove(eScenes.MainMenu);
 				}
 
 				StartCoroutine(AddScene(sceneToLoad));
 				_activeScenes.Add(sceneToLoad);
 
 			}
+		}
+		else
+		{
+			Debug.Log("Scene is already loaded");
 		}
 	}
 
