@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// enums for each scene, values need to be the same as in Unitys buildsettings
 /// </summary>
-public enum eScenes { MainMenu, GameUI, Scene1, Scene2, Scene3 };
+public enum eScenes { Init, MainMenu, GameUI, Scene1, Scene2, Scene3 };
 
 public class SceneController : MonoBehaviour
 {
@@ -19,6 +19,10 @@ public class SceneController : MonoBehaviour
 	private Scene _management;
 	private List<eScenes> _activeScenes = new();
 
+	[SerializeField] private Canvas _prefabLoadingScreen;
+	private Canvas _loadingScreen;
+	private Fader _fade;
+
 	void Awake()
 	{
 		if(_instance != null && _instance != this)
@@ -29,20 +33,23 @@ public class SceneController : MonoBehaviour
 		if(_instance == null)
 		{
 			_instance = this;
-			_activeScenes.Add(eScenes.MainMenu);
+			_activeScenes.Add(eScenes.Init);
+
+			// set physicsmode for management to None, since it doesn't need any physics
+			CreateSceneParameters csp = new();
+			csp.localPhysicsMode = LocalPhysicsMode.None;
+			// Create and save reference to Managementscene
+			_management = SceneManager.CreateScene(_nameManagement, csp);
+			SceneManager.MoveGameObjectToScene(this.gameObject, _management);
+			_loadingScreen = Instantiate(_prefabLoadingScreen, null);
+			SceneManager.MoveGameObjectToScene(_loadingScreen.gameObject, _management);
 		}
 
 	}
 
 	private void Start()
 	{
-		// set physicsmode for management to None, since it doesn't need any physics
-		CreateSceneParameters csp = new();
-		csp.localPhysicsMode = LocalPhysicsMode.None;
-		// Create and save reference to Managementscene
-		_management = SceneManager.CreateScene(_nameManagement, csp);
-
-		SceneManager.MoveGameObjectToScene(this.gameObject, _management);
+		_fade = _loadingScreen.GetComponent<Fader>();
 	}
 
 
@@ -52,8 +59,17 @@ public class SceneController : MonoBehaviour
 	/// <param name="sceneToLoad">Scene to load</param>
 	public void LoadScene(eScenes sceneToLoad)
 	{
+		// Check for unintended loading of init-scene
+		if(sceneToLoad == eScenes.Init)
+		{
+			Debug.LogWarning("Tried to load Init-Scene.");
+			return;
+		}
+
+		// Check if scene is already loaded
 		if(!_activeScenes.Contains(sceneToLoad))
 		{
+			// Handle loading of MainMenu
 			if(sceneToLoad == eScenes.MainMenu)
 			{
 				foreach(eScenes ID in _activeScenes)
@@ -61,34 +77,37 @@ public class SceneController : MonoBehaviour
 					SceneManager.UnloadSceneAsync((int)ID);
 				}
 				_activeScenes.Clear();
-				StartCoroutine(AddScene(sceneToLoad));
+				StartCoroutine(AddScene(sceneToLoad, true));
 				_activeScenes.Add(sceneToLoad);
 			}
+			// Handle loading of other scenes
 			else
 			{
+				// Load wanted scene
+				StartCoroutine(AddScene(sceneToLoad));
+				_activeScenes.Add(sceneToLoad);             
+				
+				// if not already loaded, load UI-scene
 				if(!_activeScenes.Contains(eScenes.GameUI))
 				{
 					StartCoroutine(AddScene(eScenes.GameUI, true));
 					_activeScenes.Add(eScenes.GameUI);
 				}
 
+				// unload unneeded scenes
 				for(int i = _activeScenes.Count - 1; i >= 0; i--)
 				{
-					if(_activeScenes[i] != eScenes.GameUI)
+					if(_activeScenes[i] != eScenes.GameUI||_activeScenes[i]!=sceneToLoad)
 					{
 						SceneManager.UnloadSceneAsync((int)_activeScenes[i]);
 						_activeScenes.Remove(_activeScenes[i]);
 					}
 				}
 
-				if(_activeScenes.Contains(eScenes.MainMenu))
-				{
-					SceneManager.UnloadSceneAsync((int)eScenes.MainMenu);
-					_activeScenes.Remove(eScenes.MainMenu);
-				}
 
-				StartCoroutine(AddScene(sceneToLoad));
-				_activeScenes.Add(sceneToLoad);
+
+				Debug.Log("Fade from black");
+				_fade.fade(0.5f, false);
 
 			}
 		}
@@ -107,7 +126,17 @@ public class SceneController : MonoBehaviour
 	/// <returns>No sensible return-value</returns>
 	private IEnumerator AddScene(eScenes sceneID, bool activateImmediate = false)
 	{
-		yield return null;
+
+		if(!activateImmediate)
+		{
+			Debug.Log("Fade to black");
+			_fade.fade(0.5f);
+
+			while(_fade.Running)
+			{
+				yield return null;
+			}
+		}
 
 		AsyncOperation loader = SceneManager.LoadSceneAsync((int)sceneID, LoadSceneMode.Additive);
 		loader.allowSceneActivation = activateImmediate;
@@ -125,6 +154,17 @@ public class SceneController : MonoBehaviour
 				}
 			}
 		}
+
+		//if(!activateImmediate)
+		//{
+		//	Debug.Log("Fade from black");
+		//	_fade.fade(0.5f, false);
+
+		//	while(_fade.Running)
+		//	{
+		//		yield return null;
+		//	}
+		//}
 	}
 
 	/*

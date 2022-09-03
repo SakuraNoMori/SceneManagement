@@ -212,6 +212,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Menu
       objectReference: {fileID: 0}
+    - target: {fileID: 6730342392932811294, guid: 514552265baa80949a1d5aaefe46d804, type: 3}
+      propertyPath: sceneToLoad
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9117466986124486384, guid: 514552265baa80949a1d5aaefe46d804, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -431,6 +435,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2018754830}
     m_Modifications:
+    - target: {fileID: 1917963901358404802, guid: eeae64d7be6515645a118d66b4a57472, type: 3}
+      propertyPath: sceneToLoad
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 3238092519274327881, guid: eeae64d7be6515645a118d66b4a57472, type: 3}
       propertyPath: m_Name
       value: Blue
@@ -540,6 +548,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2018754830}
     m_Modifications:
+    - target: {fileID: 2376011621583946249, guid: 3259dc13853b33d4eba64e3451d057f4, type: 3}
+      propertyPath: sceneToLoad
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4055665096987728441, guid: 3259dc13853b33d4eba64e3451d057f4, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -724,6 +736,10 @@ PrefabInstance:
     - target: {fileID: 7373162646585583228, guid: e5eba7050c0e1f64fa2a31209efd4d90, type: 3}
       propertyPath: m_Name
       value: Red
+      objectReference: {fileID: 0}
+    - target: {fileID: 8605750580259486662, guid: e5eba7050c0e1f64fa2a31209efd4d90, type: 3}
+      propertyPath: sceneToLoad
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e5eba7050c0e1f64fa2a31209efd4d90, type: 3}
