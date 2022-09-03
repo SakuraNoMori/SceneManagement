@@ -22,10 +22,15 @@ public class Fader : MonoBehaviour
 	{
 		if(_fadeToBlack != fadeToBlack)
 		{
+			if(duration<=float.Epsilon)
+			{
+				_black.SetAlpha(fadeToBlack?1f:0f);
+			}
 			if(_running)
 			{
 				StopCoroutine(c);
 			}
+			Debug.Log("Fade " + (fadeToBlack ? "to" : "from") + " black");
 			_fadeToBlack = fadeToBlack;
 			_duration = duration;
 			_curr = _progress * _duration;
@@ -34,6 +39,9 @@ public class Fader : MonoBehaviour
 		}
 	}
 
+	/// <summary>
+	/// Function to create a fade effect
+	/// </summary>
 	private IEnumerator fading()
 	{
 		while(_fadeToBlack ? _progress < 1f : _progress > 0f)
