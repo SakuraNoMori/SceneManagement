@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 354650390601797158}
   - component: {fileID: 6571426838904692550}
   m_Layer: 5
-  m_Name: LoadingCanvas
+  m_Name: FaderCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

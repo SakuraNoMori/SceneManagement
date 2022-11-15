@@ -20,17 +20,17 @@ public class SceneController : MonoBehaviour
 	private List<eScenes> _activeScenes = new();
 	private bool _isLoading;
 
-	[SerializeField] private Canvas _prefabLoadingScreen;
-	private Canvas _loadingScreen;
-	private Fader _fadeScript;
+	private Canvas _faderCanvas;
+	private Fader _faderScript;
 
-	private Camera _cam;
+	private GameObject _cam;
 
 
 	void Awake()
 	{
 		if(_instance != null && _instance != this)
 		{
+			Debug.LogWarning("Second SceneController was created!");
 			Destroy(this.gameObject);
 			return;
 		}
@@ -45,17 +45,12 @@ public class SceneController : MonoBehaviour
 			// Create and save reference to Managementscene
 			_management = SceneManager.CreateScene(_nameManagement, csp);
 			SceneManager.MoveGameObjectToScene(this.gameObject, _management);
-			// Create and move Loadingscreen
-			_loadingScreen = Instantiate(_prefabLoadingScreen, null);
-			SceneManager.MoveGameObjectToScene(_loadingScreen.gameObject, _management);
-			_loadingScreen.name = "LoadingScreen";
 		}
 
 	}
 
 	private void Start()
 	{
-		_fadeScript = _loadingScreen.GetComponent<Fader>();
 	}
 
 	/// <summary>
@@ -114,10 +109,10 @@ public class SceneController : MonoBehaviour
 	/// <param name="fadeDuration">Duration of fading</param>
 	private IEnumerator _loadLevel(eScenes sceneToLoad,float fadeDuration=0.5f)
 	{
-		_fadeScript.activeFader(true);
-		_fadeScript.fade(fadeDuration);
+		_faderScript.activeFader(true);
+		_faderScript.fade(fadeDuration);
 
-		while(_fadeScript.Running)
+		while(_faderScript.Running)
 		{
 			yield return null;
 		}
@@ -148,13 +143,13 @@ public class SceneController : MonoBehaviour
 			yield return null;
 		}
 
-		_fadeScript.fade(fadeDuration, false);
+		_faderScript.fade(fadeDuration, false);
 
-		while(_fadeScript.Running)
+		while(_faderScript.Running)
 		{
 			yield return null;
 		}
-		_fadeScript.activeFader(false);
+		_faderScript.activeFader(false);
 
 	}
 
@@ -188,8 +183,19 @@ public class SceneController : MonoBehaviour
 
 	public void registerCam(Camera newCam)
 	{
-		_cam = newCam;
+		_cam = newCam.gameObject;
+		SceneManager.MoveGameObjectToScene(_cam, _management);
 	}
+
+	public void registerFader(Canvas fader)
+	{
+		_faderCanvas = fader;
+		// Create and move Loadingscreen
+		SceneManager.MoveGameObjectToScene(_faderCanvas.gameObject, _management);
+		_faderScript = _faderCanvas.GetComponent<Fader>();
+
+	}
+
 	/*
 	 //This script lets you load a Scene asynchronously. It uses an asyncOperation to calculate the progress and outputs the current progress to Text (could also be used to make progress bars).
 
