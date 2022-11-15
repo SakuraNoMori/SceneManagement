@@ -80,6 +80,9 @@ public class SceneController : MonoBehaviour
 			{
 				StartCoroutine(_loadLevel(sceneToLoad, fadeDuration));
 			}
+
+			//SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)sceneToLoad));
+
 		}
 		else
 		{
@@ -109,7 +112,7 @@ public class SceneController : MonoBehaviour
 	/// <param name="fadeDuration">Duration of fading</param>
 	private IEnumerator _loadLevel(eScenes sceneToLoad,float fadeDuration=0.5f)
 	{
-		_faderScript.activeFader(true);
+		_faderScript.activeFaderCanvas(true);
 		_faderScript.fade(fadeDuration);
 
 		while(_faderScript.Running)
@@ -149,7 +152,7 @@ public class SceneController : MonoBehaviour
 		{
 			yield return null;
 		}
-		_faderScript.activeFader(false);
+		_faderScript.activeFaderCanvas(false);
 
 	}
 
@@ -180,7 +183,17 @@ public class SceneController : MonoBehaviour
 		}
 	}
 
+	private void moveToManagement()
+	{
 
+	}
+
+	private void moveFromManagement()
+	{
+
+	}
+
+	#region Functions for registering objects
 	public void registerCam(Camera newCam)
 	{
 		_cam = newCam.gameObject;
@@ -196,6 +209,7 @@ public class SceneController : MonoBehaviour
 
 	}
 
+	#endregion
 	/*
 	 //This script lets you load a Scene asynchronously. It uses an asyncOperation to calculate the progress and outputs the current progress to Text (could also be used to make progress bars).
 
