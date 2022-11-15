@@ -18,12 +18,16 @@ public class SceneController : MonoBehaviour
 	private string _nameManagement = "Management";
 	private Scene _management;
 	private List<eScenes> _activeScenes = new();
-	private bool _isLoading;
+	private bool _isChanging=false;
+	private bool _isLoading = false;
 
 	private Canvas _faderCanvas;
 	private Fader _faderScript;
 
 	private GameObject _cam;
+
+	private readonly List<eScenes> _immediateLoading = new List<eScenes>();
+	private readonly List<eScenes> _needsUI = new List<eScenes>();
 
 
 	void Awake()
@@ -46,11 +50,14 @@ public class SceneController : MonoBehaviour
 			_management = SceneManager.CreateScene(_nameManagement, csp);
 			SceneManager.MoveGameObjectToScene(this.gameObject, _management);
 		}
-
 	}
 
 	private void Start()
 	{
+		_immediateLoading.Add(eScenes.MainMenu);
+		_needsUI.Add(eScenes.Scene1);
+		_needsUI.Add(eScenes.Scene2);
+		_needsUI.Add(eScenes.Scene3);
 	}
 
 	/// <summary>
@@ -66,6 +73,11 @@ public class SceneController : MonoBehaviour
 			Debug.LogWarning("Tried to load Init-Scene.");
 			return;
 		}
+		if(_isChanging)
+		{
+			return;			
+		}
+		_isChanging = true;
 
 		// Check if scene is already loaded
 		if(!_activeScenes.Contains(sceneToLoad))
@@ -73,7 +85,7 @@ public class SceneController : MonoBehaviour
 			// Handle loading of MainMenu
 			if(sceneToLoad == eScenes.MainMenu)
 			{
-				StartCoroutine(_loadMainMenu());
+				StartCoroutine(_loadLevel(eScenes.MainMenu, 0f));
 			}
 			// Handle loading of other scenes
 			else
@@ -88,94 +100,60 @@ public class SceneController : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Function to load the MainMenu
-	/// </summary>
-	private IEnumerator _loadMainMenu()
-	{
-		_faderScript.activeFaderCanvas(true);
-		_faderScript.fade(0f);
-
-		while(_faderScript.Running)
-		{
-			yield return null;
-		}
-
-		moveToManagement();
-		foreach(eScenes ID in _activeScenes)
-		{
-			SceneManager.UnloadSceneAsync((int)ID);
-		}
-		_activeScenes.Clear();
-
-		// Load wanted scene
-		StartCoroutine(AddScene(eScenes.MainMenu, true));
-		_activeScenes.Add(eScenes.MainMenu);
-
-		while(_isLoading)
-		{
-			yield return null;
-		}
-
-		_faderScript.fade(0f, false);
-
-		while(_faderScript.Running)
-		{
-			yield return null;
-		}
-		_faderScript.activeFaderCanvas(false);
-		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)eScenes.MainMenu));
-
-	}
-
-	/// <summary>
 	/// Function to load a specific scene with fade-in/-out
 	/// </summary>
 	/// <param name="sceneToLoad">Scene to load</param>
 	/// <param name="fadeDuration">Duration of fading</param>
-	private IEnumerator _loadLevel(eScenes sceneToLoad,float fadeDuration=0.5f)
+	private IEnumerator _loadLevel(eScenes sceneToLoad, float fadeDuration = 0.5f)
 	{
 		_faderScript.activeFaderCanvas(true);
 		_faderScript.fade(fadeDuration);
 
-		while(_faderScript.Running)
+		do
 		{
 			yield return null;
-		}
+		} while(_faderScript.Running);
 
 		// unload unneeded scenes
 		for(int i = _activeScenes.Count - 1; i >= 0; i--)
 		{
-			if(_activeScenes[i] != eScenes.GameUI && _activeScenes[i] != sceneToLoad)
+			if(_activeScenes[i] != sceneToLoad)
 			{
+				if(_activeScenes[i] == eScenes.GameUI && _needsUI.Contains(sceneToLoad))
+				{
+					continue;
+				}
 				SceneManager.UnloadSceneAsync((int)_activeScenes[i]);
 				_activeScenes.Remove(_activeScenes[i]);
 			}
 		}
 
 		// if not already loaded, load UI-scene
-		if(!_activeScenes.Contains(eScenes.GameUI))
+		if(!_activeScenes.Contains(eScenes.GameUI) && _needsUI.Contains(sceneToLoad))
 		{
 			StartCoroutine(AddScene(eScenes.GameUI, true));
 			_activeScenes.Add(eScenes.GameUI);
 		}
 
 		// Load wanted scene
-		StartCoroutine(AddScene(sceneToLoad));
+		StartCoroutine(AddScene(sceneToLoad, _immediateLoading.Contains(sceneToLoad)));
 		_activeScenes.Add(sceneToLoad);
 
-		while(_isLoading)
+		do
 		{
 			yield return null;
-		}
+		} while(_isLoading);
 
 		_faderScript.fade(fadeDuration, false);
 
-		while(_faderScript.Running)
+		do
 		{
 			yield return null;
-		}
+		} while(_faderScript.Running);
 		_faderScript.activeFaderCanvas(false);
+
 		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)sceneToLoad));
+		_isChanging = false;
 	}
 
 	/// <summary>
@@ -195,8 +173,8 @@ public class SceneController : MonoBehaviour
 
 			if(loader.progress >= 0.9f && activateImmediate == false)
 			{
-				Debug.Log("Scene ready to load, press space");
-				if(Input.GetKeyDown(KeyCode.Space))
+				Debug.Log("Scene ready to load, press backspace");
+				if(Input.GetKeyDown(KeyCode.Backspace))
 				{
 					loader.allowSceneActivation = true;
 					_isLoading = false;
