@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public class Buttonscript : MonoBehaviour
 {
 	public eScenes sceneToLoad;
+	public float _loadDuration;
 	private Button b;
     // Start is called before the first frame update
     void Start()
@@ -14,6 +15,6 @@ public class Buttonscript : MonoBehaviour
 
 	void onClick()
 	{
-		SceneController.Instance.LoadScene(sceneToLoad);
+		SceneController.Instance.LoadScene(sceneToLoad, _loadDuration);
 	}
 }

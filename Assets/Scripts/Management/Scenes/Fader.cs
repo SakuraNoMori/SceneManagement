@@ -5,7 +5,7 @@ using UnityEngine;
 public class Fader : MonoBehaviour
 {
 	[SerializeField] private CanvasRenderer _black;
-	private bool _fadeToBlack;
+	private bool _fadeToBlack=false;
 	private float _curr=0f;
 	private float _progress=0f;
 	private float _duration=0f;
@@ -16,6 +16,7 @@ public class Fader : MonoBehaviour
 	private void Awake()
 	{
 		_black.SetAlpha(0f);
+		activeFader(false);
 	}
 
 	public void fade(float duration, bool fadeToBlack = true)
@@ -52,6 +53,11 @@ public class Fader : MonoBehaviour
 			yield return null;
 		}
 		_running = false;
+	}
+
+	public void activeFader(bool active)
+	{
+		_black.gameObject.SetActive(active);
 	}
 }
 

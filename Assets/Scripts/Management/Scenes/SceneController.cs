@@ -24,6 +24,8 @@ public class SceneController : MonoBehaviour
 	private Canvas _loadingScreen;
 	private Fader _fadeScript;
 
+	private Camera _cam;
+
 
 	void Awake()
 	{
@@ -112,6 +114,7 @@ public class SceneController : MonoBehaviour
 	/// <param name="fadeDuration">Duration of fading</param>
 	private IEnumerator _loadLevel(eScenes sceneToLoad,float fadeDuration=0.5f)
 	{
+		_fadeScript.activeFader(true);
 		_fadeScript.fade(fadeDuration);
 
 		while(_fadeScript.Running)
@@ -151,6 +154,8 @@ public class SceneController : MonoBehaviour
 		{
 			yield return null;
 		}
+		_fadeScript.activeFader(false);
+
 	}
 
 	/// <summary>
@@ -180,6 +185,11 @@ public class SceneController : MonoBehaviour
 		}
 	}
 
+
+	public void registerCam(Camera newCam)
+	{
+		_cam = newCam;
+	}
 	/*
 	 //This script lets you load a Scene asynchronously. It uses an asyncOperation to calculate the progress and outputs the current progress to Text (could also be used to make progress bars).
 
