@@ -10,12 +10,12 @@ public class Init : MonoBehaviour
 	private Camera _cam;
 	private Canvas _faderCanvas;
 
-	private GameObject go;
+	private bool _waiting = true;
 
 	private void Awake()
 	{
 		// Instantiating all necessary objects
-		go = new GameObject("Managers");
+		GameObject go = new GameObject("Managers");
 
 		_cam = Instantiate(_camPrefab);
 
@@ -29,7 +29,6 @@ public class Init : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-
 		SceneController.Instance.registerCam(_cam);
 		SceneController.Instance.registerFader(_faderCanvas);
 	}
@@ -38,9 +37,10 @@ public class Init : MonoBehaviour
 	void Update()
 	{
 		_delay -= Time.deltaTime;
-		if(_delay <= 0f)
+		if(_delay <= 0f&&_waiting)
 		{
 			SceneController.Instance.LoadScene(eScenes.MainMenu);
+			_waiting = false;
 		}
 	}
 }
