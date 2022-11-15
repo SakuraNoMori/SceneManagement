@@ -23,14 +23,16 @@ public class Fader : MonoBehaviour
 	{
 		if(_fadeToBlack != fadeToBlack)
 		{
-			if(duration <= float.Epsilon)
-			{
-				_black.SetAlpha(fadeToBlack ? 1f : 0f);
-			}
 			if(_running)
 			{
 				StopCoroutine(c);
 				c = null;
+			}
+			if(duration <= float.Epsilon)
+			{
+				_black.SetAlpha(fadeToBlack ? 1f : 0f);
+				_progress = _fadeToBlack ? 1f : 0f;
+				return;
 			}
 			_fadeToBlack = fadeToBlack;
 			_duration = duration;

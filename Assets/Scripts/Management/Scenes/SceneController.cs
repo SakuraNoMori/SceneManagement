@@ -80,9 +80,6 @@ public class SceneController : MonoBehaviour
 			{
 				StartCoroutine(_loadLevel(sceneToLoad, fadeDuration));
 			}
-
-			//SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)sceneToLoad));
-
 		}
 		else
 		{
@@ -95,14 +92,39 @@ public class SceneController : MonoBehaviour
 	/// </summary>
 	private IEnumerator _loadMainMenu()
 	{
+		_faderScript.activeFaderCanvas(true);
+		_faderScript.fade(0f);
+
+		while(_faderScript.Running)
+		{
+			yield return null;
+		}
+
+		moveToManagement();
 		foreach(eScenes ID in _activeScenes)
 		{
 			SceneManager.UnloadSceneAsync((int)ID);
 		}
 		_activeScenes.Clear();
+
+		// Load wanted scene
 		StartCoroutine(AddScene(eScenes.MainMenu, true));
 		_activeScenes.Add(eScenes.MainMenu);
-		yield return null;
+
+		while(_isLoading)
+		{
+			yield return null;
+		}
+
+		_faderScript.fade(0f, false);
+
+		while(_faderScript.Running)
+		{
+			yield return null;
+		}
+		_faderScript.activeFaderCanvas(false);
+		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)eScenes.MainMenu));
+
 	}
 
 	/// <summary>
@@ -153,7 +175,7 @@ public class SceneController : MonoBehaviour
 			yield return null;
 		}
 		_faderScript.activeFaderCanvas(false);
-
+		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)sceneToLoad));
 	}
 
 	/// <summary>
