@@ -96,6 +96,7 @@ public class SceneController : MonoBehaviour
 		else
 		{
 			Debug.Log("Scene is already loaded");
+			_isChanging = false;
 		}
 	}
 
