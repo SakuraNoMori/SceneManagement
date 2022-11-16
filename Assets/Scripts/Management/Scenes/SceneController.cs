@@ -18,7 +18,7 @@ public class SceneController : MonoBehaviour
 	private string _nameManagement = "Management";
 	private Scene _management;
 	private List<eScenes> _activeScenes = new();
-	private bool _isChanging=false;
+	private bool _isChanging = false;
 	private bool _isLoading = false;
 
 	private Canvas _faderCanvas;
@@ -75,7 +75,7 @@ public class SceneController : MonoBehaviour
 		}
 		if(_isChanging)
 		{
-			return;			
+			return;
 		}
 		_isChanging = true;
 
@@ -114,6 +114,9 @@ public class SceneController : MonoBehaviour
 			yield return null;
 		} while(_faderScript.Running);
 
+		SceneManager.SetActiveScene(_management);
+		moveToManagement();
+
 		// unload unneeded scenes
 		for(int i = _activeScenes.Count - 1; i >= 0; i--)
 		{
@@ -145,6 +148,7 @@ public class SceneController : MonoBehaviour
 		} while(_isLoading);
 
 		_faderScript.fade(fadeDuration, false);
+		moveFromManagement(sceneToLoad);
 
 		do
 		{
@@ -152,6 +156,7 @@ public class SceneController : MonoBehaviour
 		} while(_faderScript.Running);
 		_faderScript.activeFaderCanvas(false);
 
+		yield return new WaitForSecondsRealtime(0.02f);
 		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)sceneToLoad));
 		_isChanging = false;
 	}
@@ -185,12 +190,12 @@ public class SceneController : MonoBehaviour
 
 	private void moveToManagement()
 	{
-
+		SceneManager.MoveGameObjectToScene(_cam, _management);
 	}
 
-	private void moveFromManagement()
+	private void moveFromManagement(eScenes scene)
 	{
-
+		SceneManager.MoveGameObjectToScene(_cam, SceneManager.GetSceneByBuildIndex((int)scene));
 	}
 
 	#region Functions for registering objects
