@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Init : MonoBehaviour
 {
@@ -18,12 +19,15 @@ public class Init : MonoBehaviour
 		GameObject go = new GameObject("Managers");
 
 		_cam = Instantiate(_camPrefab);
+		_cam.name ="CameraMain";
 
 		_faderCanvas = Instantiate(_prefabFaderCanvas, null);
 		_faderCanvas.name = "FaderCanvas";
 
 		// Creating components
 		go.AddComponent<SceneController>();
+		go.AddComponent<EventSystem>();
+		go.AddComponent<StandaloneInputModule>();
 	}
 
 	// Start is called before the first frame update
