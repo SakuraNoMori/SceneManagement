@@ -21,6 +21,8 @@ public class SceneController : MonoBehaviour
 	private bool _isChanging = false;
 	private bool _isLoading = false;
 
+	private eScenes _nextActiveScene;
+
 	private Canvas _faderCanvas;
 	private Fader _faderScript;
 
@@ -49,6 +51,7 @@ public class SceneController : MonoBehaviour
 			// Create and save reference to Managementscene
 			_management = SceneManager.CreateScene(_nameManagement, csp);
 			SceneManager.MoveGameObjectToScene(this.gameObject, _management);
+			SceneManager.sceneLoaded += afterLoad;
 		}
 	}
 
@@ -78,6 +81,8 @@ public class SceneController : MonoBehaviour
 			return;
 		}
 		_isChanging = true;
+
+		_nextActiveScene = sceneToLoad;
 
 		// Check if scene is already loaded
 		if(!_activeScenes.Contains(sceneToLoad))
@@ -157,8 +162,8 @@ public class SceneController : MonoBehaviour
 		} while(_faderScript.Running);
 		_faderScript.activeFaderCanvas(false);
 
-		yield return new WaitForSecondsRealtime(0.02f);
-		SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)sceneToLoad));
+		//yield return new WaitForSecondsRealtime(0.02f);
+		//SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex((int)sceneToLoad));
 		_isChanging = false;
 	}
 
@@ -213,6 +218,17 @@ public class SceneController : MonoBehaviour
 		SceneManager.MoveGameObjectToScene(_faderCanvas.gameObject, _management);
 		_faderScript = _faderCanvas.GetComponent<Fader>();
 
+	}
+
+
+	private void afterLoad(Scene scene, LoadSceneMode mode)
+	{
+		Debug.Log("Scene " + scene.name + " was loaded.");
+		if(scene == SceneManager.GetSceneByBuildIndex((int)_nextActiveScene))
+		{
+			SceneManager.SetActiveScene(scene);
+		}
+		Debug.Log("Active scene is: " + SceneManager.GetActiveScene().name);
 	}
 
 	#endregion
